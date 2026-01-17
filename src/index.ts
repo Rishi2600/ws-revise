@@ -16,10 +16,16 @@ wss.on('connection', (socket) => {
   socket.on('error', console.error)
 
   socket.on('message', (data, isBinary) => {
-    console.log(`message from the client is ${data}`)
-    socket.send(data, {
-      binary: isBinary
-    })
+
+    const message = data.toString();
+
+    if (message === "ping") {
+      socket.send("pong", {
+        binary: isBinary
+      })
+    } else {
+      socket.send("send ping to get back pong")
+    }
   })
 
   socket.send("This message is to confirm the connection is estableished with the wss")
