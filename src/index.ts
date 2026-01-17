@@ -1,36 +1,30 @@
-import WebSocket, {WebSocketServer} from "ws";
-import http from 'http';
+import { WebSocketServer } from "ws";
+import express from 'express';
 
-const port: number = 8080;
+const app = express();
 
-const server = http.createServer((req: any, res: any) => {
-  console.log(`Received a ${req.method} request from the ${req.url}`)
-  res.end("Hey there")
+const port = 8080;
+
+app.get('/', (req: any, res: any) => {
+  console.log(`Received ${req.method} request from the ${req.url} route`)
+  res.send("Hi there")
 })
 
-const wss = new WebSocketServer({server})
+const wss = new WebSocketServer({port: 8080})
 
 wss.on('connection', (socket) => {
-
-  socket.on('error', console.error);
+  socket.on('error', console.error)
 
   socket.on('message', (data, isBinary) => {
-
-    const message = data.toString()
-
-    if(message == "ping") {
-      socket.send("pong")
-    } else {
-      socket.send("message ping to get pong", {
-        binary: isBinary
-      })
-    }
-
+    console.log(`message from the client is ${data}`)
+    socket.send(data, {
+      binary: isBinary
+    })
   })
 
-  socket.send("this is the message to ensure the connection is established with the wss")
+  socket.send("This message is to confirm the connection is estableished with the wss")
 })
 
-server.listen(port, () => {
-  console.log('server is listening on port: ' + port)
+app.listen(port, () => {
+  console.log('Server is listening on port: ' + port)
 })
