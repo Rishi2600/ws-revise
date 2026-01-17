@@ -8,19 +8,36 @@ const server = http.createServer((req: any, res: any) => {
   res.end("Hey there")
 })
 
+function getRandomInt(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 const wss = new WebSocketServer({server})
 
 wss.on('connection', (socket) => {
+
+  //@ts-ignore
+  socket.id = getRandomInt(0, 100)
+
   socket.on('error', console.error);
 
   socket.on('message', (data, isBinary) => {
-    console.log('data from the websocket server: ' + data)
-    socket.send(data, {
-      binary: isBinary
+
+    wss.clients.forEach((client) => {
+      if(client.readyState === WebSocket.OPEN) {
+
+        console.log('data from the websocket server: ' + data)
+
+        client.send(data, {
+          binary: isBinary
+        })
+      }
     })
+
   })
 
-  socket.send("this is the message to ensure the connection is established with the wss")
+  //@ts-ignore
+  socket.send("this is the message to ensure the connection is established with the wss, and the uid is: " + socket.id)
 })
 
 server.listen(port, () => {
