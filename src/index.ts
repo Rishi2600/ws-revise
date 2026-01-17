@@ -1,36 +1,28 @@
-import WebSocket, { WebSocketServer } from 'ws';
-import express from 'express';
+import WebSocket, {WebSocketServer} from "ws";
+import http from 'http';
 
-const app = express();
 const port: number = 8080;
 
-const wss = new WebSocketServer({ port });
-
-app.get('/', (req, res) => {
-  console.log(`${(new Date())}, recieved a ${req.method} request from ${req.url}`)
-  res.json({
-    response: "Hey there"
-  })
+const server = http.createServer((req: any, res: any) => {
+  console.log(`Received a ${req.method} request from the ${req.url}`)
+  res.end("Hey there")
 })
 
-wss.on('connection', function connection (socket) {
-  socket.on ('error', console.error)
+const wss = new WebSocketServer({server})
 
-  socket.on('message', function message(data) {
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === WebSocket.OPEN) {
-        console.log(data)
-      const message = socket.send(data)
-      client.send(data)
-      }
+wss.on('connection', (socket) => {
+  socket.on('error', console.error);
+
+  socket.on('message', (data, isBinary) => {
+    console.log('data from the websocket server: ' + data)
+    socket.send(data, {
+      binary: isBinary
     })
-    
   })
 
-  socket.send("this is from server, you have the connection!!!")
-
+  socket.send("this is the message to ensure the connection is established with the wss")
 })
 
-app.listen(port, () => {
-  console.log(`server is listening to port ${port}`)
+server.listen(port, () => {
+  console.log('server is listening on port: ' + port)
 })
