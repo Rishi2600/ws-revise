@@ -15,14 +15,11 @@ const wss = new WebSocketServer({port: 8080})
 wss.on('connection', (socket) => {
   socket.on('error', console.error)
 
-  //for broadcasting - first, we check where the handler is (here, it is at the message), and then we iterate to all the clients, followed by forwarding them the message.
   socket.on('message', (data, isBinary) => {
     wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(data, {
-          binary: isBinary
-        })
-      }
+      client.send(data, {
+        binary: isBinary
+      })
     })
   })
 
