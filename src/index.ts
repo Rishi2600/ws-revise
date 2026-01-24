@@ -22,19 +22,11 @@ wss.on('connection', (socket) => {
     console.error
   });
 
-  socket.on('message', (data, isBinary) => {
-    wss.clients.forEach((client) => {
-      client.send(data, {
-        binary: isBinary
-      })
-    })
-  });
+  socket.on('open', () => {
+    socket.send('connection established')
+  })
 
-  socket.on('message', (data, isBinary) => {
-    socket.send(data, {
-      binary: isBinary
-    })
-  });
-
-  socket.send("You got a conection established with the websockter server");
+  socket.on('message', (data) => {
+    console.log(`${data} is the text data received`)
+  })
 })
