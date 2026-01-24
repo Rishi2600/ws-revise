@@ -23,10 +23,12 @@ wss.on('connection', (socket) => {
   });
 
   socket.on('open', () => {
-    socket.send('connection established')
-  })
+    const array = new Float32Array(5);
 
-  socket.on('message', (data) => {
-    console.log(`${data} is the text data received`)
+    for (let i=0; i<array.length; i++) {
+      array[i] = i/2;
+    }
+
+    socket.send(array);
   })
 })
