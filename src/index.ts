@@ -3,14 +3,19 @@ import { WebSocketServer } from 'ws';
 
 const app = express();
 
-const port: number = 8080;
+const port: number = 8000;
 
-const wss = new WebSocketServer({port: 8080})
 
 app.get("/", (req, res) => {
-  console.log(`request url: ${req.url}, with status code: ${req.statusCode}`)
+  console.log(`request url: ${req.url}, with status code: ${res.statusCode}`)
   res.send("Hi there")
 })
+
+const server = app.listen(port, () => {
+  console.log(`Server is listening on port: ${port}`)
+});
+
+const wss = new WebSocketServer({server})
 
 wss.on('connection', (socket) => {
   socket.on('error', () => {
@@ -33,7 +38,3 @@ wss.on('connection', (socket) => {
 
   socket.send("You got a conection established with the websockter server");
 })
-
-app.listen(port, () => {
-  console.log(`Server is listening on port: ${port}`)
-});
