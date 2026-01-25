@@ -1,35 +1,33 @@
-/* import {createServer} from 'https'; */
-import { readFileSync } from 'fs';
-import { WebSocketServer } from 'ws';
-import https from 'https';
-import express from 'express'
+import { WebSocketServer } from "ws";
+import http from 'http';
 
-const app = express();
+const server = http.createServer();
 
-const server = https.createServer({
-  cert: readFileSync('./cert.pem'),
-  key: readFileSync('./key.pem')
-}, app)
+const wss1 = new WebSocketServer({noServer: true});
+const wss2 = new WebSocketServer({noServer: true});
 
-const wss = new WebSocketServer({server});
-
-app.get('/', (req, res) => {
-  console.log(`HI HTTPS, ${req.url}`)
-  res.send("Hi there")
+wss1.on('connection', (ws) => {
+  ws.on('error', console.error)
 })
 
-wss.on('connection', (socket) => {
-  socket.on('error', console.error)
+wss2.on('connection', (ws) => {
+  ws.on('error', console.error)
+})
 
-  socket.on('open', () => {
-    socket.on('message', (data) => {
-      console.log(data)
+server.on('upgrade', (req: any, socket: any, head: any) => {
+  const {pathname} = new URL(req.url, 'wss://base.url')
 
-      socket.send(data);
+  if (pathname === '/1') {
+    wss1.handleUpgrade(req, socket, head, (ws: any) => {
+      wss1.emit('connection from 1', ws, req)
     })
-  })
+  } else if (pathname === '/2') {
+    wss2.handleUpgrade(req, socket, head, (ws: any) => {
+      wss2.emit('connection from 2', ws. req)
+    })
+  } else {
+    socket.destroy()
+  }
 })
 
-server.listen(8080, () => {
-  console.log("Sever is listenting to port 8080")
-})
+server.listen(8080)
