@@ -1,31 +1,30 @@
-import express from 'express';
+/* import {createServer} from 'https'; */
+import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
+import https from 'https';
 
-const app = express();
-
-const wss = new WebSocketServer({port: 8080})
-
-app.get("/", (req, res) => {
-  console.log(`request url: ${req.url}, with status code: ${res.statusCode}`)
-  res.send("Hi there")
+const server = https.createServer({
+  cert: readFileSync('./cert.pem'),
+  key: readFileSync('./key.pem')
+},(req, res) => {
+  console.log(`Server connection established with https at ${req.url}, and the response status code is: ${res.statusCode}`)
+  res.end("Hi there")
 })
 
+const wss = new WebSocketServer({server});
 
 wss.on('connection', (socket) => {
-  socket.on('error', () => {
-    console.error
-  });
+  socket.on('error', console.error)
 
   socket.on('open', () => {
     socket.on('message', (data) => {
-      console.log(data);
+      console.log(data)
+
+      socket.send(data);
     })
-
-    socket.send("connection established")
   })
-
 })
 
-app.listen(8000, () => {
-  console.log(`Server is listening on port: ${8000}`)
-});
+server.listen(8080, () => {
+  console.log("Sever is listenting to port 8080")
+})
