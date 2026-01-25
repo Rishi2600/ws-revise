@@ -2,16 +2,21 @@
 import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
 import https from 'https';
+import express from 'express'
+
+const app = express();
 
 const server = https.createServer({
   cert: readFileSync('./cert.pem'),
   key: readFileSync('./key.pem')
-},(req, res) => {
-  console.log(`Server connection established with https at ${req.url}, and the response status code is: ${res.statusCode}`)
-  res.end("Hi there")
-})
+}, app)
 
 const wss = new WebSocketServer({server});
+
+app.get('/', (req, res) => {
+  console.log(`HI HTTPS, ${req.url}`)
+  res.send("Hi there")
+})
 
 wss.on('connection', (socket) => {
   socket.on('error', console.error)
